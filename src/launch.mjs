@@ -167,6 +167,45 @@ export async function launchExtension({ extensionPath, hosts = {}, nativeHostNam
       );
     },
 
+    /**
+     * Reloads the unpacked extension the way its Reload button on chrome://extensions does, with every open
+     * page (a provider window, work tabs) left open: their content scripts are orphaned and the service worker
+     * and `storage.session` start fresh. (`chrome.runtime.reload()` does not work here: it leaves a flag-loaded
+     * extension unloaded.) Extension pages, such as the Side Panel, close; open the panel again afterwards.
+     * Resolves once the new service worker is running; `env.worker` is replaced by it.
+     */
+    async reloadExtension() {
+      const previous = worker;
+      const manager = await context.newPage();
+      try {
+        await manager.goto('chrome://extensions');
+        // Without developer mode (this temporary profile's setting only) Chromium marks a reloaded unpacked
+        // extension as `unsupportedDeveloperExtension` and leaves it disabled.
+        await manager.evaluate(() => chrome.developerPrivate.updateProfileConfiguration({ inDeveloperMode: true }));
+        await manager.evaluate((id) => chrome.developerPrivate.reload(id, { failQuietly: true }), extensionId);
+        await waitFor(() => !context.serviceWorkers().includes(previous), { message: 'the old service worker to be unloaded', timeout: 15_000 });
+        // The reload call returns before the extension is loaded again; its pages are blocked until then.
+        await waitFor(
+          () => manager.evaluate(async (id) => (await chrome.developerPrivate.getExtensionsInfo()).some((item) => item.id === id && item.state === 'ENABLED'), extensionId),
+          { message: 'the extension to be enabled again', timeout: 15_000 },
+        );
+      } finally {
+        await manager.close();
+      }
+      if (context.serviceWorkers().length === 0) {
+        // A reloaded worker starts on its first event; an extension page's message is one.
+        const wake = await context.newPage();
+        try {
+          await wake.goto(`chrome-extension://${extensionId}/${manifest.side_panel.default_path}`);
+          await wake.evaluate(() => chrome.runtime.sendMessage({ type: '__e2e_wake' }).catch(() => {}));
+        } finally {
+          await wake.close();
+        }
+      }
+      worker = env.worker = await waitFor(() => context.serviceWorkers()[0], { message: 'the reloaded service worker', timeout: 15_000 });
+      return worker;
+    },
+
     /** Pages of the whole browser, including the ones the extension created (through the debugging connection). */
     async allPages() {
       if (!cdpBrowser) cdpBrowser = await chromium.connectOverCDP(`http://127.0.0.1:${cdpPort}`);

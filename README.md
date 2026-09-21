@@ -16,7 +16,7 @@ const env = await launchExtension({
 });
 const work = await env.openPage(env.fixtureUrl('/form'));   // fixture.test / mail.test: /form /mail /popup /second
 const panel = await env.openSidePanel(work);                // the extension's real Side Panel
-// env.context (Playwright), env.worker, env.requests, env.allPages(), await env.close()
+// env.context (Playwright), env.worker, env.requests, env.allPages(), await env.reloadExtension(), await env.close()
 ```
 
 Projects depend on it as a dev dependency (`file:../browser-webmcp-e2e` while developing; a tagged GitHub dependency once stable).
@@ -39,7 +39,9 @@ Measured by `npm test` (the self-test drives a tiny extension in `test/ext/`):
 - The real Side Panel is opened from a trusted click on an extension page and reached over a loopback debugging connection (`--remote-debugging-port`, a free port, this browser only). Its messages have no `sender.tab`; a panel page opened as an ordinary tab does, and the extension may reject it.
 - Everything is removed on `close()`: the temporary profile, certificate and server.
 
-Not covered: a real service-worker restart (`chrome.runtime.reload()` unloads a flag-loaded extension), real DeepSeek/ChatGPT sites, macOS window occlusion and dialogs, the toolbar-icon click itself.
+`env.reloadExtension()` reloads the extension like the Reload button on `chrome://extensions` (pages stay open, their content scripts are orphaned, `storage.session` is cleared, `storage.local` is kept) and returns the new service worker. It switches on developer mode in the temporary profile first: without it Chromium leaves a reloaded unpacked extension disabled. Extension pages such as the Side Panel close on reload.
+
+Not covered: a service-worker *idle* restart without an extension reload (`chrome.runtime.reload()` does not work for a flag-loaded extension, it stays unloaded), real DeepSeek/ChatGPT sites, macOS window occlusion and dialogs, the toolbar-icon click itself.
 
 ## Requirements
 

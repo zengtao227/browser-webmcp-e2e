@@ -88,6 +88,20 @@ test('the real Side Panel is opened and reached; its messages carry no tab, and 
   assert.equal(panelPages.length, 1);
 });
 
+test('reloadExtension: a fresh service worker and empty session storage, local storage kept, open pages left open', async () => {
+  await env.worker.evaluate(() => Promise.all([chrome.storage.session.set({ marker: 1 }), chrome.storage.local.set({ marker: 1 })]));
+  const page = await env.openPage(env.fixtureUrl('/second'));
+  const before = env.worker;
+  const after = await env.reloadExtension();
+  assert.notEqual(after, before);
+  assert.equal(env.worker, after);
+  assert.equal(await env.worker.evaluate(() => chrome.runtime.id), env.extensionId);
+  assert.deepEqual(await env.worker.evaluate(() => chrome.storage.session.get('marker')), {});
+  assert.deepEqual(await env.worker.evaluate(() => chrome.storage.local.get('marker')), { marker: 1 });
+  assert.equal(page.isClosed(), false);
+  assert.ok((await env.allPages()).some((p) => p.url() === env.fixtureUrl('/second')));
+});
+
 test('close removes the temporary directory', async () => {
   const other = await launchExtension({ extensionPath: EXT });
   const tmp = other.tmp;
