@@ -1,6 +1,7 @@
 {
   "name": "browser-webmcp-e2e",
   "version": "0.1.0",
+  "license": "MIT",
   "private": true,
   "type": "module",
   "description": "Small end-to-end harness for browser extensions in the Browser WebMCP family: launch, real Side Panel, local fixtures, network and native-host guards.",
