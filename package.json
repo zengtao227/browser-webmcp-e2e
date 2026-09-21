@@ -1,0 +1,17 @@
+{
+  "name": "browser-webmcp-e2e",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Small end-to-end harness for browser extensions in the Browser WebMCP family: launch, real Side Panel, local fixtures, network and native-host guards.",
+  "main": "src/index.mjs",
+  "exports": { ".": "./src/index.mjs" },
+  "engines": { "node": ">=22" },
+  "scripts": {
+    "install-browser": "PLAYWRIGHT_SKIP_BROWSER_GC=1 playwright-core install chromium",
+    "test": "node --test test/*.test.mjs"
+  },
+  "dependencies": {
+    "playwright-core": "1.63.0"
+  }
+}

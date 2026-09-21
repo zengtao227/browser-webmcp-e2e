@@ -1,0 +1,12 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Fixture Form</title>
+<h1>Employee Travel Claim</h1>
+<form onsubmit="event.preventDefault(); document.title = 'SUBMITTED'">
+  <label>Employee name <input name="name" aria-label="Employee name"></label>
+  <label>Country
+    <select name="country" aria-label="Country"><option value="">-</option><option value="CH">Switzerland</option><option value="DE">Germany</option></select>
+  </label>
+  <label>Approval password <input type="password" name="pw" value="fixture-secret" aria-label="Approval password"></label>
+  <button type="submit">Submit</button>
+</form>

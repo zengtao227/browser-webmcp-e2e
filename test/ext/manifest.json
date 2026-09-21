@@ -1,0 +1,11 @@
+{
+  "manifest_version": 3,
+  "name": "browser-webmcp-e2e self-test extension",
+  "version": "0.0.1",
+  "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEArzZHYiGLG8b9Loadxe3nEAmLTWSOGOBLWdDaK9RiT3ytLSAA+G44f4XN4YACVHZELBbOqCmRFmQKgJr2g2aNTr/R4QkvoMtJo9PE1xSi4sfm/lamWBXJ0p+AoEKSQP/E7QHpjU85cyeD1VAW7L5BgKUXRkzuNQJdtbOHYoW/zy3e30dAh8mcFzdsz6YFa886EV5uHeBEEu1WSSrT+3mVF9tk9HL5HxrM+ggBbg7+Af5y0bzkCpsCn9VMWl0MzYJMULnu9PbOo1JAC+ZLXxgXO3KfOeVBTrsi2YjRBSPCYf/k1oG06vITkQIeHTnEBbOcURFDTe+AVVlUx9tye+t7bwIDAQAB",
+  "permissions": ["sidePanel", "storage", "nativeMessaging"],
+  "host_permissions": ["http://*/*", "https://*/*"],
+  "background": { "service_worker": "background.js" },
+  "side_panel": { "default_path": "panel.html" },
+  "action": { "default_title": "self-test" }
+}
